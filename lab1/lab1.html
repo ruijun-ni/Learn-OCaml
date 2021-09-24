@@ -1,0 +1,506 @@
+<!-- Created by Bracy 0.4 on Sunday, September 12, 2021 at 12:11 PM CDT -->
+<html>
+ <head>
+  <title>
+   CSci 2041 Computer Laboratory 1
+  </title>
+  <style>
+   a:active
+    { color: purple;
+      font-weight: bold;
+      text-decoration: none }
+   a:link
+    { color: blue;
+      font-weight: bold;
+      text-decoration: none }
+   a:visited
+    { color: purple;
+      font-weight: bold;
+      text-decoration: none }
+   hr
+    { background-color: black;
+      border: none;
+      color: black;
+      height: 1px }
+   table
+    { border-collapse: collapse }
+  </style>
+ </head>
+ <body bgcolor="#FFFFFF">
+  <p align="center">
+   <b>Computer Laboratory 1</b>
+   <br />
+   <b>CS<small>CI</small> 2041: Advanced Programming Principles</b>
+   <br />
+   <b>September 13&#8211;14, 2021</b>
+  </p>
+  <p>
+   <b>0. Introduction.</b>
+  </p>
+  <p align="justify">
+   In this lab assignment, you will write three recursive OCaml functions that
+   perform computations with lists. It&rsquo;s primarily intended to introduce
+   OCaml&rsquo;s notation, which may be unfamiliar to many students.
+  </p>
+  <p>
+   <b>1. Implementation.</b>
+  </p>
+  <p align="justify">
+   Here are brief descriptions of the functions you must write, some examples
+   of how they must work, and some hints about how to write them.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Your functions must use the OCaml&rsquo;s
+   <tt>if</tt>&#8211;<tt>then</tt>&#8211;<tt>else</tt>,
+   <tt>let</tt>&#8211;<tt>in</tt>, and
+   <tt>let</tt>&#8211;<tt>rec</tt>&#8211;<tt>in</tt>, as
+   discussed in the lectures. They must also use the OCaml functions
+   <tt>hd</tt>, <tt>tl</tt>, and <tt>::</tt> (<i>cons</i>),
+   again as discussed in the lectures. Your functions will be similar in design
+   to those of other languages, such as Java and Python, although their
+   notation will be different. Later in the course, we will discuss better ways
+   to write functions like these, using OCaml&rsquo;s pattern matching
+   mechanism.
+  </p>
+  <p align="justify">
+   <b>How Many.</b> Your first function must be called
+   <tt>howMany</tt>, and it must accept two arguments: <i>e</i> and
+   <i>l</i>. The argument <i>e</i> may be any object. The argument
+   <i>l</i> must be a list of objects with the same type as <i>e</i>.
+   The call <tt>howMany</tt>&nbsp;<i>e</i>&nbsp;<i>l</i> must
+   return how many times <i>e</i> appears as an element in <i>l.</i>
+   The type of <tt>howMany</tt> must be
+   <tt>'a</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>int</tt>.
+   Here are some examples of how <tt>howMany</tt> must work, where the
+   symbol &lsquo;&#8658;&rsquo; means <i>returns.</i>
+  </p>
+  <blockquote>
+   <table cellpadding="0" cellspacing="0">
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany 1 []</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>0</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany 1 [1]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>1</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany 2 [1 ; 2 ; 3]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>1</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany 5 [2 ; 4 ; 6]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>0</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany "c" ["c" ; "b" ; "c" ; "d"]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>2</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>howMany "x" ["a" ; "b" ; "c" ; "d"]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>0</tt>
+      </p>
+     </td>
+    </tr>
+   </table>
+  </blockquote>
+  <p align="justify">
+   Hints: write a recursion with one base case and two recursive cases. The
+   base case detects when <i>l</i> is empty. The first recursive case
+   detects when <i>e</i> is the first element of <i>l.</i> The second
+   recursive case detects when <i>e</i> is not the first element of
+   <i>l.</i>
+  </p>
+  <p align="justify">
+   <b>Delete.</b> Your second function must be called
+   <tt>delete</tt>, and it must accept two arguments: <i>e</i> and
+   <i>l</i>. Just as in <tt>howMany</tt>, <i>e</i> may be any
+   object, and <i>l</i> must be a list of objects with the same type as
+   <i>e</i>. The call
+   <tt>delete</tt>&nbsp;<i>e</i>&nbsp;<i>l</i> must return a
+   list like <i>l,</i> but without any <i>e</i>&rsquo;s as elements.
+   The type of <tt>delete</tt> must be
+   <tt>'a</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>.
+   Here are some examples of how <tt>delete</tt> must work.
+  </p>
+  <blockquote>
+   <table cellpadding="0" cellspacing="0">
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete 1 []</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>[]</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete 1 [1]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>[]</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete 1 [1 ; 2 ; 3]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>[2 ; 3]</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete 4 [1 ; 2 ; 3]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>[1 ; 2 ; 3]</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete 1 [1 ; 2 ; 1 ; 3 ; 1 ; 4]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>[2 ; 3 ; 4]</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>delete "a" ["x" ; "a" ; "y" ; "a"]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>["x" ; "y"]</tt>
+      </p>
+     </td>
+    </tr>
+   </table>
+  </blockquote>
+  <p align="justify">
+   Hints: This function should have a base case and two recursive cases. The
+   base case detects when <i>l</i> is empty. The first recursive case
+   detects when <i>e</i> is the first element of <i>l.</i> The second
+   recursive case detects when <i>e</i> is not the first element of
+   <i>l,</i> and it must use <tt>::</tt>.
+  </p>
+  <p align="justify">
+   <b>Mean.</b> Your third function must be called <tt>mean</tt>, and
+   it must accept one argument <i>l</i>, a list of one or more
+   <tt>float</tt> numbers. The call <tt>mean</tt>&nbsp;<i>l</i>
+   must return the arithmetic mean (average) of all the numbers in
+   <i>l.</i> You may assume <i>l</i> will never be empty, so
+   <tt>mean</tt>&nbsp;<tt>[]</tt> may be undefined. The type of
+   <tt>mean</tt> must be
+   <tt>float</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>float</tt>.
+   Here are some examples of how <tt>mean</tt> must work.
+  </p>
+  <blockquote>
+   <table cellpadding="0" cellspacing="0">
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>mean [1.0]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>1.0</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>mean [1.0 ; 2.0]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>1.5</tt>
+      </p>
+     </td>
+    </tr>
+    <tr valign="top">
+     <td>
+      <p align="right">
+       <tt>mean [1.0 ; 0.0 ; -1.0 ; 1.0]</tt>
+      </p>
+     </td>
+     <td>
+      <p align="center">
+       &nbsp;&nbsp;&#8658;&nbsp;&nbsp;
+      </p>
+     </td>
+     <td>
+      <p>
+       <tt>0.25</tt>
+      </p>
+     </td>
+    </tr>
+   </table>
+  </blockquote>
+  <p align="justify">
+   Hints: The arithmetic operators for <tt>float</tt>&rsquo;s have
+   annoying names that end with dots: <tt>+.</tt>, <tt>-.</tt>,
+   <tt>*.</tt>, and <tt>/.</tt>. The usual operators <tt>=</tt>,
+   <tt>&lt;&gt;</tt>, <tt>&lt;</tt>, <tt>&gt;</tt>,
+   <tt>&lt;=</tt>, and <tt>&gt;=</tt> work for <tt>floats</tt>,
+   but without the dots. Also, OCaml does not coerce <tt>int</tt>&rsquo;s
+   to <tt>float</tt>&rsquo;s, so <tt>0</tt> is different from
+   <tt>0.0</tt>.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The best way to write <tt>mean</tt> is
+   to use two &lsquo;&lsquo;helper&rsquo;&rsquo; functions, which might be
+   called <tt>length</tt> and <tt>sum</tt>. The function
+   <tt>length</tt> returns the number of elements in <i>l.</i> The
+   function <tt>sum</tt> adds all the elements in <i>l</i> and
+   returns their total. These helper functions might be defined inside
+   <tt>mean</tt>, using two nested
+   <tt>let</tt>&#8211;<tt>rec</tt>&#8211;<tt>in</tt>&rsquo;s.
+   They could also be defined as separate functions, outside
+   <tt>mean</tt>.
+  </p>
+  <p>
+   <b>2. Tests.</b>
+  </p>
+  <p align="justify">
+   For this assignment, you will use OCaml&rsquo;s read-evaluate-print-loop
+   (<small>REPL</small>) to execute and test your functions. Here&rsquo;s
+   one way to do that. It assumes you&rsquo;re running OCaml from something
+   like a Linux or Unix shell.
+  </p>
+  <ol>
+   <li>
+   <p align="justify">
+    Use a text editor to write code for your functions on a text file. The
+    file&rsquo;s name must end with the suffix <tt>.ml</tt>. Let&rsquo;s
+    assume your file is called <tt>dromedary.ml</tt> (a dromedary is a
+    camel with one hump, but a Bactrian camel has two). Use a different name
+    for your file. The first line of <tt>dromedary.ml</tt> must be
+    <tt>open</tt>&nbsp;<tt>List</tt>, which loads the
+    <tt>List</tt> module from OCaml&rsquo;s library. This module defines
+    the functions <tt>hd</tt> and <tt>tl</tt>, among other things.
+   </p>
+   <li>
+   <p align="justify">
+    The rest of <tt>dromedary.ml</tt> must contain definitions for the
+    three functions described previously. Some can be defined with
+    <tt>let</tt>, others with <tt>let</tt>&#8211;<tt>rec</tt>.
+    Each definition must be terminated by <tt>;;</tt>.
+   </p>
+   <li>
+   <p align="justify">
+    To test your functions, type the command <tt>ocaml</tt> to the shell.
+    OCaml will print a brief message and respond with a prompt <tt>#</tt>.
+    Type
+    <tt>#use</tt>&nbsp;<tt>"dromedary.ml"</tt>&nbsp;<tt>;;</tt>.
+    (You must type another &lsquo;<tt>#</tt>&rsquo; even though OCaml has
+    printed one already.) OCaml will load the code from
+    <tt>dromedary.ml</tt> and execute it to define your functions.
+   </p>
+   <li>
+   <p align="justify">
+    If there are syntax errors in your code, then OCaml will print error
+    messages. If that happens, then exit OCaml by typing the single character
+    <i>control</i>-<i>D.</i> Go back to step 1 and fix the errors.
+   </p>
+   <li>
+   <p align="justify">
+    If there are no syntax errors, then OCaml will print the following. It
+    tells you what functions <tt>dromedary.ml</tt> defined, and what their
+    types are.
+   </p>
+   <blockquote>
+    <p>
+     <tt>val</tt>&nbsp;<tt>howMany</tt>&nbsp;<tt>:</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>int</tt>&nbsp;<tt>=</tt>&nbsp;<tt>&lt;fun&gt;</tt>&nbsp;
+     <br />
+     <tt>val</tt>&nbsp;<tt>delete</tt>&nbsp;<tt>:</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>'a</tt>&nbsp;<tt>list</tt>&nbsp;<tt>=</tt>&nbsp;<tt>&lt;fun&gt;</tt>&nbsp;
+     <br />
+     <tt>val</tt>&nbsp;<tt>mean</tt>&nbsp;<tt>:</tt>&nbsp;<tt>float</tt>&nbsp;<tt>list</tt>&nbsp;<tt>-&gt;</tt>&nbsp;<tt>float</tt>&nbsp;<tt>=</tt>&nbsp;<tt>&lt;fun&gt;</tt>
+    </p>
+   </blockquote>
+   <p align="justify">
+    You can now type some example calls to OCaml that test your functions. Each
+    call must end with <tt>;;</tt>. For example, you might type
+    <tt>howMany</tt>&nbsp;<tt>1</tt>&nbsp;<tt>[]</tt>&nbsp;<tt>;;</tt>.
+    If your function call doesn&rsquo;t work the way it should, then exit OCaml
+    and go back to step 1, as before.
+   </p>
+   <li>
+   <p align="justify">
+    When you&rsquo;re confident that your functions work, then run the tests
+    for this assignment. They&rsquo;re on the file
+    <a href="tests1.ml">
+     <tt>tests1.ml,</tt>
+    </a>
+    so you run them by typing
+    <tt>#use</tt>&nbsp;<tt>"tests1.ml"</tt>&nbsp;<tt>;;</tt> to
+    OCaml. Each test has a function call, a comment that tells what the call
+    must return if it&rsquo;s correct, and a number of points. If your function
+    returns the same object that appears in the comment, then you&rsquo;ll
+    receive the points. Your score for this assignment will be the total number
+    of points you receive on all the tests.
+   </p>
+  </ol>
+  <p align="justify">
+   You might have a fancy <small>IDE</small> (Integrated Development
+   Environment) that does some of these things for you automatically. All
+   <small>IDE</small>&rsquo;s work differently, so they aren&rsquo;t
+   described here.
+  </p>
+  <p>
+   <b>3. Deliverables.</b>
+  </p>
+  <p align="justify">
+   Run the tests in the file
+   <a href="tests1.ml">
+    <tt>tests1.ml</tt>.
+   </a>
+   They are worth <b>30 points.</b> Then submit the OCaml code for your
+   functions, the tests, and the results of the tests, all in one file. Put the
+   test results in a comment
+   <tt>(&#8727;</tt>&nbsp;...&nbsp;<tt>&#8727;)</tt> at the end of
+   your file. Your lab TA&rsquo;s will tell you how and where to turn in your
+   work. It must be submitted by <b>11:55 <small>PM</small></b> on
+   <b>Tuesday, September 21, 2021.</b>
+  </p>
+ </body>
+</html>
