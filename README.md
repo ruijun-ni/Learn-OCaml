@@ -27,3 +27,7 @@
  - Grammars. Scanners. 
  - Parsers. Interpreters. 
  - Metaprogramming. Macros. 
+
+### Contents
+#### Labs
+- [lab1: list](/lab1)
