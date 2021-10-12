@@ -1,9 +1,3 @@
-(* 
-My name: Chenyang Liu
-x500: liu01076 
-Partner: Ruijun Ni
-x500:nee00011
-*)
 
 let num = fst ;; 
 let den = snd ;;
