@@ -30,4 +30,8 @@
 
 ### Contents
 #### Labs
-- [lab1: list](/lab1)
+- [Lab 1](/lab1): List [(link)](https://canvas.umn.edu/courses/268617/files/22902169?module_item_id=6797499&fd_cookie_set=1)
+- [Lab 2](/lab2): arithmetic with rational numbers; imperative to applicative [(link)](https://canvas.umn.edu/courses/268617/files/23068240?module_item_id=6822373&fd_cookie_set=1)
+- [Lab 3](/lab3): BST [(link)](https://canvas.umn.edu/courses/268617/files/23241602?module_item_id=6843004&fd_cookie_set=1)
+- [Lab 4](/lab4): Continuation Passing Style (CPS) [(link)](https://canvas.umn.edu/courses/268617/files/23424036?module_item_id=6862510&fd_cookie_set=1)
+- [Lab 5](/lab5): Propositional Logic [(link)](https://canvas.umn.edu/courses/268617/files/23621472?module_item_id=6887704&fd_cookie_set=1)
