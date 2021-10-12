@@ -1,11 +1,3 @@
-(*****************************************************
-*  My name: Chenyang Liu liu01076@umn.edu                                                  *
-*  My partner's name: Ruijun Ni nee00011@umn.edu               *
-*    *
-*                                                    *
-******************************************************)
-
-
 (*
   Tests for CSci 2041 Computer Laboratory 1
   James Moen
