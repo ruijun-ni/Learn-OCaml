@@ -10,26 +10,6 @@ type proposition =
   If of proposition * proposition * proposition ;;
 
 
-(* ================================= *)
-
-
-(* let alPut pairs key value =
-  (key, value) :: pairs ;;
-
-
-let generateAndTestPairs etc names =
-  let rec generatingAndTestingPairs names pairs =
-    match names
-    with [] ->
-           etc pairs |
-         name :: names ->
-           generatingAndTestingPairs names (alPut pairs name false) &&
-           generatingAndTestingPairs names (alPut pairs name true)
-  in generatingAndTestingPairs names [] ;; *)
-
-(* ================================= *)
-
-
 let ifify p =
     let rec ififying p =
         match p
@@ -44,9 +24,14 @@ let ifify p =
              If (a, b, c) -> If ((ififying a), (ififying b), (ififying c))
     in ififying p
 ;;
-            
-let ifExp = ifify (Imply ((Not (And ((Var "p"), (Var "q")))), (Or ((Not (Var "p")), (Not (Var "q"))))));;
 
+(*           
+  let ifExp = ifify (Imply ((Not (And ((Var "p"), (Var "q")))), (Or ((Not (Var "p")), (Not (Var "q"))))));;
+
+  val ifExp : proposition =
+    If (If (If (Var "p", Var "q", False), False, True),
+    If (If (Var "p", False, True), True, If (Var "q", False, True)), True)
+*)
 
 
 let normalize c =
@@ -61,7 +46,30 @@ let normalize c =
     in normalizing c
 ;;
 
-let normalizedIF = normalize ifExp;;      
+(*
+  let normalizedIF = normalize ifExp;;     
+
+  val normalizedIF : proposition =
+    If (Var "p",
+    If (Var "q",
+      If (False,
+      If (Var "p", If (False, True, If (Var "q", False, True)),
+        If (True, True, If (Var "q", False, True))),
+      True),
+      If (True,
+      If (Var "p", If (False, True, If (Var "q", False, True)),
+        If (True, True, If (Var "q", False, True))),
+      True)),
+    If (False,
+      If (False,
+      If (Var "p", If (False, True, If (Var "q", False, True)),
+        If (True, True, If (Var "q", False, True))),
+      True),
+      If (True,
+      If (Var "p", If (False, True, If (Var "q", False, True)),
+        If (True, True, If (Var "q", False, True))),
+      True))) 
+*)
 
 
 
@@ -78,54 +86,67 @@ let substitute c v b =
     in substituting c v b
 ;;
 
-(* substitute normalizedIF "p" True;; *)
+(*
+  example:
+  substitute normalizedIF "p" True;; 
+*)
 
 
 let simplify c =
-    let rec normalizing c = 
+    let rec simplifying c = 
         match c 
         with True -> True |
              False -> False |
              Var a -> Var a |
-             If (True, a, b) -> (normalizing a) |
-             If (False, a, b) -> (normalizing b) |
-             If (pi, True, False) -> (normalizing pi) |
+             If (True, a, b) -> (simplifying a) |
+             If (False, a, b) -> (simplifying b) |
+             If (pi, True, False) -> pi |
              If (pi, a, b) -> 
                 if a = b
-                then (normalizing a)
-                else (If ((normalizing pi), (normalizing a), (normalizing b)))
-    in normalizing c
+                then (simplifying a)
+                else (If (pi, (simplifying a), (simplifying b)))
+    in simplifying c
 ;;
 
-let simpliedIF = simplify normalizedIF;;
-
-
-
 (* 
+  let simpliedIF = simplify normalizedIF;;
 
-If (Var "p",
- If (Var "q", True, If (Var "p", If (Var "q", False, True), True)),
- If (Var "p", If (Var "q", False, True), True))
+  val simpliedIF : proposition =
+    If (Var "p",
+    If (Var "q", True, If (Var "p", If (Var "q", False, True), True)),
+    If (Var "p", If (Var "q", False, True), True)) 
+*)
 
- *)
- 
-let try1 = substitute simpliedIF "p" True;;
 
- (* 
- 
- If (True, 
-     If (Var "q", True, If (True, If (Var "q", False, True), True)),
-     If (True, If (Var "q", False, True), True)
-    )
 
-  *)
+(* change True and False from "proposition" type to "Boolean" type true and false *)
+(* here p is the simplified form *)
+let evaluate p =
+  match p
+  with True -> true |
+       False -> false;;
 
-let try2 = substitute try1 "q" True;;
+(* a helper function evaluating all four cases *)
+(* here p is the simplified form *)
+let tautologyHelper p =
+  evaluate (simplify (substitute (substitute p "p" True) "q" True)) &&
+  evaluate (simplify (substitute (substitute p "p" True) "q" False)) &&
+  evaluate (simplify (substitute (substitute p "p" False) "q" True)) &&
+  evaluate (simplify (substitute (substitute p "p" False) "q" False)) ;;
 
-(* 
 
-If (True, 
-    If (True, True, If (True, If (True, False, True), True)),
-    If (True, If (True, False, True), True))
+let tautology p =
+  tautologyHelper (simplify (normalize (ifify p)));;
 
- *)
+
+(* TEST 1*)
+tautology (Imply ((Not (And ((Var "p"), (Var "q")))), (Or ((Not (Var "p")), (Not (Var "q"))))));;
+(* - : bool = true *)
+
+(* TEST 2 *)
+let deMorgan =
+  Equiv (
+   And (Var "p", Var "q"),
+   Not (Or (Not (Var "p"), Not (Var "q")))) ;;
+tautology deMorgan;;
+(* - : bool = true *)
