@@ -10,133 +10,58 @@ type proposition =
   If of proposition * proposition * proposition ;;
 
 
-let ifify p =
-    let rec ififying p =
-        match p
-        with True -> True |
-             False -> False |
-             Var a -> Var a |
-             Not a -> If ((ififying a), False, True) |
-             And (a, b) -> If ((ififying a), (ififying b), False) |
-             Or (a, b) -> If ((ififying a), True, (ififying b)) |
-             Imply (a, b) -> If ((ififying a), (ififying b), True) |
-             Equiv (a, b) -> If ((ififying a), (ififying b), (If ((ififying b), False, True))) |
-             If (a, b, c) -> If ((ififying a), (ififying b), (ififying c))
-    in ififying p
-;;
-
-(*           
-  let ifExp = ifify (Imply ((Not (And ((Var "p"), (Var "q")))), (Or ((Not (Var "p")), (Not (Var "q"))))));;
-
-  val ifExp : proposition =
-    If (If (If (Var "p", Var "q", False), False, True),
-    If (If (Var "p", False, True), True, If (Var "q", False, True)), True)
-*)
-
-
-let normalize c =
-    let rec normalizing c = 
-        match c 
-        with True -> True |
-             False -> False |
-             Var a -> Var a |
-             If (If (pi, a1, b1), a2, b2) -> normalizing (If ((normalizing pi), (If ((normalizing a1), a2, b2)), (If ((normalizing b1), a2, b2)))) |
-             If (pi, a, b) -> If ((normalizing pi), (normalizing a), (normalizing b))
-             (* If (pi, a, b) -> If ((normalizing pi), a, b) *)
-    in normalizing c
-;;
-
-(*
-  let normalizedIF = normalize ifExp;;     
-
-  val normalizedIF : proposition =
-    If (Var "p",
-    If (Var "q",
-      If (False,
-      If (Var "p", If (False, True, If (Var "q", False, True)),
-        If (True, True, If (Var "q", False, True))),
-      True),
-      If (True,
-      If (Var "p", If (False, True, If (Var "q", False, True)),
-        If (True, True, If (Var "q", False, True))),
-      True)),
-    If (False,
-      If (False,
-      If (Var "p", If (False, True, If (Var "q", False, True)),
-        If (True, True, If (Var "q", False, True))),
-      True),
-      If (True,
-      If (Var "p", If (False, True, If (Var "q", False, True)),
-        If (True, True, If (Var "q", False, True))),
-      True))) 
-*)
-
-
-
-let substitute c v b =
-    let rec substituting c v b =
-        match c 
-        with True -> True |
-             False -> False |
-             Var a -> 
-                if a = v 
-                then b 
-                else Var a |
-            If (pi, left, right) -> If ((substituting pi v b), (substituting left v b), (substituting right v b)) 
-    in substituting c v b
-;;
-
-(*
-  example:
-  substitute normalizedIF "p" True;; 
-*)
-
-
-let simplify c =
-    let rec simplifying c = 
-        match c 
-        with True -> True |
-             False -> False |
-             Var a -> Var a |
-             If (True, a, b) -> (simplifying a) |
-             If (False, a, b) -> (simplifying b) |
-             If (pi, True, False) -> pi |
-             If (pi, a, b) -> 
-                if a = b
-                then (simplifying a)
-                else (If (pi, (simplifying a), (simplifying b)))
-    in simplifying c
-;;
-
-(* 
-  let simpliedIF = simplify normalizedIF;;
-
-  val simpliedIF : proposition =
-    If (Var "p",
-    If (Var "q", True, If (Var "p", If (Var "q", False, True), True)),
-    If (Var "p", If (Var "q", False, True), True)) 
-*)
-
-
-
-(* change True and False from "proposition" type to "Boolean" type true and false *)
-(* here p is the simplified form *)
-let evaluate p =
+let rec ifify p =
   match p
-  with True -> true |
-       False -> false;;
+  with True -> True |
+      False -> False |
+      Var a -> Var a |
+      Not a -> If ((ifify a), False, True) |
+      And (a, b) -> If ((ifify a), (ifify b), False) |
+      Or (a, b) -> If ((ifify a), True, (ifify b)) |
+      Imply (a, b) -> If ((ifify a), (ifify b), True) |
+      Equiv (a, b) -> If ((ifify a), (ifify b), (If ((ifify b), False, True))) |
+      If (a, b, c) -> If ((ifify a), (ifify b), (ifify c))
+;;
 
-(* a helper function evaluating all four cases *)
-(* here p is the simplified form *)
-let tautologyHelper p =
-  evaluate (simplify (substitute (substitute p "p" True) "q" True)) &&
-  evaluate (simplify (substitute (substitute p "p" True) "q" False)) &&
-  evaluate (simplify (substitute (substitute p "p" False) "q" True)) &&
-  evaluate (simplify (substitute (substitute p "p" False) "q" False)) ;;
+
+let rec normalize c =
+  match c 
+  with If (If (pi, a1, b1), a2, b2) -> normalize (If ((normalize pi), (If ((normalize a1), a2, b2)), (If ((normalize b1), a2, b2)))) |
+       If (pi, a, b) -> If ((normalize pi), (normalize a), (normalize b)) |
+       _ -> c
+;;
 
 
-let tautology p =
-  tautologyHelper (simplify (normalize (ifify p)));;
+let rec substitute c v b =
+  match c 
+  with Var a ->
+       if a = v 
+       then b 
+       else c |
+       If (pi, left, right) -> If ((substitute pi v b), (substitute left v b), (substitute right v b)) |
+       _ -> c ;;
+       
+
+let rec simplify c =
+  match c
+  with If (True, a, b) -> simplify a |
+       If (False, a, b) -> simplify b |
+       If (pi, a, b) ->
+          (match pi
+           with Var x ->
+                  if (simplify (substitute a x True)) = (simplify (substitute b x False))
+                  then (simplify (substitute a x True))
+                  else If(pi, (simplify (substitute a x True)), (simplify (substitute b x False))) |
+               _ -> if (simplify a) = (simplify b)
+                    then (simplify a)
+                    else If(pi, (simplify a), (simplify b))) |
+        _ -> c;;
+
+
+let tautology c =
+  if simplify(normalize(ifify c)) = True
+  then True 
+  else False ;;
 
 
 (* TEST 1*)
@@ -150,3 +75,33 @@ let deMorgan =
    Not (Or (Not (Var "p"), Not (Var "q")))) ;;
 tautology deMorgan;;
 (* - : bool = true *)
+
+(* TEST 3 *)
+tautology (And (Var "p", Var "q")) ;;
+(* - : proposition = False *)
+
+
+(* OUTPUT:
+
+    type proposition =
+        False
+      | True
+      | Var of string
+      | And of proposition * proposition
+      | Or of proposition * proposition
+      | Not of proposition
+      | Imply of proposition * proposition
+      | Equiv of proposition * proposition
+      | If of proposition * proposition * proposition
+    val ifify : proposition -> proposition = <fun>
+    val normalize : proposition -> proposition = <fun>
+    val substitute : proposition -> string -> proposition -> proposition = <fun>
+    val simplify : proposition -> proposition = <fun>
+    val tautology : proposition -> proposition = <fun>
+    - : proposition = True
+    val deMorgan : proposition =
+      Equiv (And (Var "p", Var "q"), Not (Or (Not (Var "p"), Not (Var "q"))))
+    - : proposition = True
+    - : proposition = False
+
+ *)
