@@ -1,0 +1,10 @@
+;  This Lisp function computes factorials.
+
+(define factorial                ;  Its name is FACTORIAL.
+ (lambda (n)                     ;  It has one parameter, N.
+  (if
+   (= n 0)                       ;  If N is 0 ...
+   1                             ;  then return 1, else ...
+   (* n (factorial (- n 1))))))  ;  return N times the FACTORIAL of N minus 1.
+
+;  That's all, folks!
