@@ -1,0 +1,97 @@
+;
+;  THINGS. Test inputs for Project 2.
+;
+;    James Moen
+;    24 Nov 21
+;
+;  Unlike the tests for a lab, these are not worth points. Instead, they help
+;  test if your parser works correctly. Each ";" comment shows the internal
+;  OCaml representation of the Lisp expression that follows it. Your parser
+;  should construct the representation shown in the comment when it reads the
+;  Lisp expression that follows the comment.
+;
+
+;  Nil
+
+nil
+
+;  Number 7734
+
+7734
+
+;  Symbol "lobyms"
+
+lobyms
+
+;  Cons (Symbol "a", Nil)
+
+(a)
+
+;  Cons (Symbol "a", Cons (Symbol "b", Nil))
+
+(a b)
+
+;  Cons (Symbol "a",
+;    Cons (Symbol "b",
+;      Cons (Symbol "c", Nil)))
+
+(a b c)
+
+;  Cons (
+;    Cons (Symbol "a", Nil),
+;    Cons (Symbol "b",
+;      Cons (Symbol "c", Nil)))
+
+((a) b c)
+
+;  Cons (
+;    Cons (Symbol "a",
+;      Cons (Symbol "b", Nil)),
+;    Cons (Symbol "c", Nil))
+
+((a b) c)
+
+;  Cons (Symbol "a",
+;    Cons (
+;      Cons(Symbol "b", Cons (Symbol "c", Nil)),
+;      Nil))
+
+(a (b c))
+
+;  Cons (
+;    Cons (Symbol "a",
+;      Cons (Symbol "b",
+;        Cons (Symbol "c", Nil))),
+;    Nil)
+
+((a b c))
+
+;  Cons (Symbol "define",
+;    Cons (Symbol "!",
+;     Cons
+;      (Cons (Symbol "lambda",
+;        Cons (Cons (Symbol "n", Nil),
+;         Cons
+;          (Cons (Symbol "if",
+;            Cons (Cons (Symbol "=", Cons (Symbol "n", Cons (Number 0, Nil))),
+;             Cons (Number 1,
+;              Cons
+;               (Cons (Symbol "*",
+;                 Cons (Symbol "n",
+;                  Cons
+;                   (Cons (Symbol "!",
+;                     Cons
+;                      (Cons (Symbol "-",
+;                        Cons (Symbol "n", Cons (Number 1, Nil))),
+;                      Nil)),
+;                   Nil))),
+;               Nil)))),
+;          Nil))),
+;      Nil)))
+
+(define !
+  (lambda (n)
+    (if
+      (= n 0)
+      1
+      (* n (! (- n 1))))))

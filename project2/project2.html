@@ -1,0 +1,464 @@
+<!-- Created by Bracy 0.4 on Wednesday, November 24, 2021 at 5:59 PM CST -->
+<html>
+ <head>
+  <title>
+   CSci 2041 Programming Project 2
+  </title>
+  <style>
+   a:active
+    { color: purple;
+      font-weight: bold;
+      text-decoration: none }
+   a:link
+    { color: blue;
+      font-weight: bold;
+      text-decoration: none }
+   a:visited
+    { color: purple;
+      font-weight: bold;
+      text-decoration: none }
+   hr
+    { background-color: black;
+      border: none;
+      color: black;
+      height: 1px }
+   table
+    { border-collapse: collapse }
+  </style>
+ </head>
+ <body bgcolor="#FFFFFF">
+  <p align="center">
+   <b>Programming Project 2</b>
+   <br />
+   <b>CS<small>CI</small> 2041 Advanced Programming Principles</b>
+   <br />
+   <b>Fall 2021</b>
+  </p>
+  <p>
+   <b>0. Introduction.</b>
+  </p>
+  <p align="justify">
+   In this programming project, you will write an OCaml module whose functions
+   parse Lisp <i>thing</i>&rsquo;s from a file, and return the internal
+   representations of those <i>thing</i>&rsquo;s. It will use the token
+   scanner from Lab 9, in a module called <tt>Scanner</tt>. If we have a
+   function that reads Lisp <i>thing</i>&rsquo;s, a function that
+   evaluates Lisp <i>thing</i>&rsquo;s, and a function that prints Lisp
+   <i>thing</i>&rsquo;s, then we could put them all together to make a
+   complete Lisp system. Writing the evaluator will be the subject of the next
+   few lectures.
+  </p>
+  <p>
+   <b>1. Theory.</b>
+  </p>
+  <p align="justify">
+   In formal language theory, a <i>language</i> is a set of strings; a
+   <i>string</i> is a sequence of tokens. A <i>grammar</i> is a
+   mathematical description of a language that tells which strings are in the
+   set, and which strings are not. One way to specify a grammar is to use
+   mathematical rules, but we won&rsquo;t do that here. Instead, we&rsquo;ll
+   use a directed graph called a <i>syntax diagram.</i> A syntax diagram
+   for Lisp <i>thing</i>&rsquo;s is shown below.
+  </p>
+  <p align="center">
+   <img border="0" src="thing.png">
+  </p>
+  <p align="justify">
+   Every syntax diagram has a name: the name of this diagram is
+   <b>thing</b>. It has exactly one arrow that lets you enter the diagram
+   on the left, and exactly one arrow that lets you exit the diagram on the
+   right. By following arrows from left to right, going all the way through the
+   diagram, you can tell what sequences of tokens can be
+   <i>thing</i>&rsquo;s.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The box labeled <b>thing</b> stands for
+   a Lisp <i>thing</i>. The diagram is recursive, because it is defined in
+   terms of itself: there is a box labeled <b>thing</b> inside the diagram
+   labeled <b>thing</b>. The box labeled <b>number</b> is a Lisp
+   number token (from Lab 9). It&rsquo;s a sequence of one or more digits,
+   &lsquo;<tt>0</tt>&rsquo; through &lsquo;<tt>9</tt>&rsquo;,
+   preceded by an optional minus sign &lsquo;&#8722;&rsquo;. The box labeled
+   <b>symbol</b> is a Lisp symbol token (also from Lab 9). It&rsquo;s a
+   sequence of one or more characters other than blanks, newlines, and
+   parentheses. There is no box labeled <b>nil</b>, because it&rsquo;s
+   simpler to pretend that <tt>nil</tt> is a <b>symbol</b>, even
+   though it really isn&rsquo;t (see below).
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Here are some examples of
+   <i>thing</i>&rsquo;s that are described by the diagram. A number, like
+   <tt>100</tt>, is a <i>thing,</i> because we can start on the left,
+   follow arrows to the box labeled <b>number</b>, and then follow arrows
+   out of the diagram again.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A symbol, like <tt>hello</tt>, is also a
+   <i>thing,</i> because we can start on the left, follow arrows to the
+   box labeled <b>symbol</b>, and then follow arrows out of the diagram.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An empty list, like <tt>()</tt>, is a
+   <i>thing,</i> because we can follow an arrow to the circle labeled
+   &lsquo;<b>(</b>&rsquo;, follow an arrow to the circle labeled
+   &lsquo;<b>)</b>&rsquo;, and then follow an arrow out of the diagram. In
+   Lisp, <tt>()</tt> is just another notation for <tt>nil</tt> (see
+   below).
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A list, like <tt>(a&nbsp;b&nbsp;c)</tt>,
+   is a <i>thing</i>, because we can follow an arrow to the circle labeled
+   &lsquo;<b>(</b>&rsquo;, and then to the box labeled <b>thing</b>.
+   We imagine that a copy of the diagram <b>thing</b> appears in place of
+   that box. If we follow arrows through that copy, then we find that
+   <tt>a</tt> is also a <i>thing.</i> If we go around the loop, back
+   to the box labeled <b>thing</b>, we find in the same way that
+   <tt>b</tt> is another <i>thing</i>, and if we go around the loop
+   again, we find that <tt>c</tt> is a <i>thing</i> as well. When we
+   exit the loop, we follow an arrow through a circle labeled
+   &lsquo;<b>)</b>&rsquo;, and then follow yet another arrow out of the
+   diagram.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; We could show that nested lists like
+   <tt>((a)&nbsp;b&nbsp;c)</tt> and <tt>(a&nbsp;(b&nbsp;c))</tt> are
+   <i>thing</i>&rsquo;s too, by following arrows through the diagram in
+   the same way. And we could show that something like
+   &lsquo;<tt>)x(()5(</tt>&rsquo; is not a <i>thing,</i> because
+   there is no way to follow arrows through the diagram given its tokens.
+  </p>
+  <p>
+   <b>2. Implementation.</b>
+  </p>
+  <p align="justify">
+   For this project, you must write an OCaml module called
+   <tt>Parser</tt>, whose type is the OCaml signature
+   <tt>Parsers</tt>. (A <i>parser</i> is a procedure that reads a
+   series of tokens and constructs a representation of what the tokens stand
+   for.) The module <tt>Parser</tt> will use functions defined in the
+   module <tt>Scanner</tt> from Lab 9. Although <tt>Parser</tt> may
+   contain many functions, only two OCaml objects must be visible outside it:
+   the exception <tt>Can'tParse</tt>, and the function
+   <tt>makeParser</tt>, both of which are described below.
+  </p>
+  <blockquote>
+   <dl compact="compact">
+    <dt>
+     <p>
+      <tt>Parsers</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (5 points.) Signature. This signature must describe the function
+      <tt>makeParser</tt> and the exception <tt>Can'tParse</tt>,
+      but nothing else.
+     </p>
+    </dd>
+    <dt>
+     <p>
+      <tt>Can'tParse message</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (5 points.) Exception, where <tt>message</tt> is a string. This must
+      be raised by the functions described below if they can&rsquo;t parse a
+      <i>thing</i>.
+     </p>
+    </dd>
+    <dt>
+     <p>
+      <tt>Parser</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (10 points.) Module, with the type <tt>Parsers</tt> (see above). It
+      must contain definitions for the exception <tt>Can'tParse</tt>,
+      along with the functions <tt>makeParser</tt>,
+      <tt>nextThing</tt>, and <tt>nextThings</tt>. It may also
+      contain definitions of other objects, but only <tt>makeParser</tt>
+      and <tt>Can'tParse</tt> must be visible outside
+      <tt>Parser</tt>.
+     </p>
+    </dd>
+    <dt>
+     <p>
+      <tt>makeParser path</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (10 points.) Return a parser: a new function that takes the OCaml unit
+      object <tt>()</tt> as its only argument. (Do not confuse the OCaml
+      unit object <tt>()</tt> with the Lisp list <tt>()</tt>!) Each
+      time it is called, the parser reads the next Lisp <i>thing</i> from
+      the file whose pathname is the string <tt>path</tt>, and returns
+      that <i>thing.</i>
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The function <tt>makeParser</tt> must
+      make a scanner (like the one from Lab 9) by calling
+      <tt>Scanner.makeScanner</tt>. It must also make a variable called
+      <tt>token</tt>. The scanner reads tokens from the file whose
+      pathname is <tt>path</tt>. The variable <tt>token</tt> holds
+      the token most recently read by the scanner. The scanner and the variable
+      must be visible to the parser returned by <tt>makeParser</tt>, but
+      invisible to all other functions.
+     </p>
+    </dd>
+    <dt>
+     <p>
+      <tt>nextThing ()</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (10 points.) This function does all the work for the parser returned by
+      <tt>makeParser</tt>. It examines <tt>token</tt> and uses it to
+      decide what kind of <i>thing</i> it will read. Then it reads the
+      <i>thing,</i> constructs an OCaml object which represents that
+      <i>thing,</i> and returns the object. It does this in the following
+      way.
+     </p>
+     <blockquote>
+      <table cellpadding="0" cellspacing="0">
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>CloseParenToken</tt>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;raise <tt>Can'tParse</tt>.
+         </p>
+        </td>
+       </tr>
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>EndToken</tt>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;raise <tt>Can'tParse</tt>.
+         </p>
+        </td>
+       </tr>
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>NumberToken</tt>
+          <i>n</i>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;return <tt>Number</tt> <i>n.</i>
+         </p>
+        </td>
+       </tr>
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>OpenParenToken</tt>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;read a Lisp list and return it. <tt>&nbsp;</tt>
+         </p>
+        </td>
+       </tr>
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>SymbolToken "nil"</tt>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;return <tt>Nil</tt> (see below).
+         </p>
+        </td>
+       </tr>
+       <tr valign="top">
+        <td>
+         <p>
+          If <tt>token</tt> is <tt>SymbolToken</tt>
+          <i>s</i>&nbsp;
+         </p>
+        </td>
+        <td>
+         <p align="center">
+          &nbsp;then &nbsp;
+         </p>
+        </td>
+        <td>
+         <p>
+          &nbsp;return <tt>Symbol</tt> <i>s.</i>
+         </p>
+        </td>
+       </tr>
+      </table>
+     </blockquote>
+     <p align="justify">
+      Note that <tt>nil</tt> will be read by the token scanner as a
+      <tt>SymbolToken</tt>. However, it must be treated as if it is the
+      <i>thing</i> <tt>Nil</tt>.
+     </p>
+    </dd>
+    <dt>
+     <p>
+      <tt>nextThings ()</tt>
+     </p>
+    </dt>
+    <dd>
+     <p align="justify">
+      (10 points.) This is a helper that <tt>nextThing</tt> uses to parse
+      a Lisp list. When it is called, <tt>token</tt> is the first token
+      after the <tt>OpenParenToken</tt> that begins the list. The function
+      <tt>nextThings</tt> reads a series of zero or more
+      <i>thing</i>&rsquo;s from the file whose pathname is
+      <tt>path</tt>. It stops reading when it encounters a
+      <tt>CloseParenToken</tt> or an <tt>EndFileToken</tt>. If
+      <tt>nextThings</tt> reads zero <i>things,</i> then it must
+      return <tt>Nil</tt>. If it reads one or more
+      <i>thing</i>&rsquo;s <i>t</i>&#8321;, <i>t</i>&#8322; ...,
+      <i>t&#8345;</i>, then it must return a Lisp list of those
+      <tt>thing</tt>&rsquo;s, like this.
+     </p>
+     <p align="center">
+      <tt>Cons (</tt><i>t</i><sub>1</sub><tt>, Cons
+      (</tt><i>t</i><sub>2</sub><tt>&nbsp;</tt>...<tt>,&nbsp;Cons
+      (</tt><i>t<sub>n</sub></i><tt>,&nbsp;Nil)&nbsp;</tt>
+      ...<tt>&nbsp;))</tt>
+     </p>
+     <p align="justify">
+      If <tt>nextThings</tt> encounters a <tt>CloseParenToken</tt>,
+      then it must skip that token. If it encounters an <tt>EndToken</tt>,
+      then it must raise <tt>Can'tParse</tt>, because this means the
+      Lisp list ended without a <tt>CloseParenToken</tt>.
+     </p>
+    </dd>
+   </dl>
+  </blockquote>
+  <p align="justify">
+   Here are some hints about how to write these functions. The scanner and the
+   parser are designed according to similar rules, as follows.
+  </p>
+  <ol>
+   <li>
+   <p align="justify">
+    The scanner read characters. The parser reads tokens.
+   </p>
+   <li>
+   <p align="justify">
+    The scanner used a variable <tt>ch</tt> to hold the most recently read
+    character from a file. The parser uses a variable <tt>token</tt> to
+    hold the most recently read token from a file.
+   </p>
+   <li>
+   <p align="justify">
+    The scanner was able to tell what kind of token it was about to read by
+    examining the first character of that token (in <tt>ch</tt>). The
+    parser is able to tell what kind of <i>thing</i> it is about to read
+    by examining the first token of that <i>thing</i> (in
+    <tt>token</tt>).
+   </p>
+   <li>
+   <p align="justify">
+    Whenever a function in the scanner was called, <tt>ch</tt> always held
+    the first character of the token to be read. Whenever a function in the
+    parser is called, <tt>token</tt> always holds the first token of the
+    <i>thing</i> to be read.
+   </p>
+   <li>
+   <p align="justify">
+    Whenever a function in the scanner returned, <tt>ch</tt> always held
+    the next character after the token that was just read. Whenever a function
+    in the parser returns, <tt>token</tt> always holds the next token
+    after the <i>thing</i> that was just read.
+   </p>
+  </ol>
+  <p align="justify">
+   To make some of these rules work, it is necessary to skip tokens after they
+   are read. If <tt>nextToken</tt> is the name of the scanner created by
+   <tt>makeScanner</tt>, then we can skip a token by writing
+   <tt>token</tt>&nbsp;<tt>:=</tt>&nbsp;<tt>nextToken</tt>&nbsp;<tt>()</tt>.
+   For example, after <tt>nextThing</tt> reads a
+   <tt>SymbolToken</tt>, it must skip that token in this way.
+  </p>
+  <p>
+   <b>3. Examples.</b>
+  </p>
+  <p align="justify">
+   The file
+   <a href="things.txt">
+    <tt>things.txt</tt>
+   </a>
+   on Canvas contains a series of example Lisp expressions. They are the same
+   ones that were used to test the printing function from Lab 10. The file
+   <a href="testsP2.ml">
+    <tt>testsP2.ml</tt>
+   </a>
+   on Canvas contains a series of calls to a parser created by
+   <tt>makeParser</tt>. Each call reads the next Lisp expression from
+   <tt>things.txt</tt>, converts it to an OCaml object, and prints that
+   object.
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can use <tt>things.txt</tt> and
+   <tt>testsP2.ml</tt> to test whether your parser works. However, unlike
+   the tests that come with lab assignments, the tests in
+   <tt>testsP2.ml</tt> are not worth points! The TA&rsquo;s will grade
+   this project by reading your code, not by counting how many tests succeed
+   and fail.
+  </p>
+  <p>
+   <b>4. Deliverables.</b>
+  </p>
+  <p align="justify">
+   Unlike the lab assignments, <small>YOU ARE NOT ALLOWED TO WORK WITH A
+   PARTNER ON THIS PROJECT</small>. Although you may discuss the project
+   with others in a general way, <small>IT MUST BE WRITTEN ENTIRELY BY
+   YOURSELF</small>. The project is worth <b>50 points,</b> and will be
+   due at <b>11:55 <small>PM</small></b> on <b>December 8,
+   2021.</b>
+   <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The file
+   <a href="parser.ml">
+    <tt>parser.ml</tt>,
+   </a>
+   available on Canvas, contains definitions for the OCaml type
+   <tt>thing</tt> and the OCaml module <tt>Scanner</tt>, both from
+   previous labs. It also has space for you to put your code for
+   <tt>Parser</tt>, the module that you must write for this project. Write
+   your code in that space and submit a copy of <tt>parser.ml</tt> with
+   your code in it. If you do know know how or where to submit this file, then
+   please ask your lab TA. <b>D<small>OUBLE CHECK</small></b> to make
+   sure you have submitted the correct file, both <b><small>BEFORE AND
+   AFTER</small></b> you turn it in.
+  </p>
+ </body>
+</html>
