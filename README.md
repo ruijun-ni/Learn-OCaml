@@ -29,6 +29,13 @@
  - Metaprogramming. Macros. 
 
 ### Contents
+
+#### Projects
+
+##### Tautology Checkers
+
+##### A Lisp Interpreter
+
 #### Labs
 - [Lab 1](/labs/lab1): List [(link)](https://canvas.umn.edu/courses/268617/files/22902169?module_item_id=6797499&fd_cookie_set=1)
 - [Lab 2](/labs/lab2.ml): arithmetic with rational numbers; imperative to applicative [(link)](https://canvas.umn.edu/courses/268617/files/23068240?module_item_id=6822373&fd_cookie_set=1)
